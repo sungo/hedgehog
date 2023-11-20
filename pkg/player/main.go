@@ -160,15 +160,27 @@ func Start(config Config) error {
 
 	bar := progressbar.NewOptions(100,
 		progressbar.OptionFullWidth(),
-		// progressbar.OptionSetPredictTime(false),
 	)
 
 	for {
-		next := q.WhatsNext()
+		var (
+			lastPercent float64
+
+			next = q.WhatsNext()
+		)
+
 		bar.Describe(fmt.Sprintf("|> %s : %s", next.Meta.Artist, next.Meta.Title))
+		client.ScrobbleNowPlaying(next.Meta)
 		for msg := range music.Play(next.LocalFile) {
+
+			lastPercent = msg.PercentComplete
 			bar.Set(int(msg.PercentComplete))
 		}
+
+		if lastPercent >= 75 {
+			client.ScrobbleSubmit(next.Meta)
+		}
+
 		bar.Describe("")
 		bar.Reset()
 

@@ -195,3 +195,35 @@ func (client Sonic) DownloadSong(song Song) ([]byte, error) {
 	resBody, err := io.ReadAll(resp.Body)
 	return resBody, err
 }
+
+func (client Sonic) ScrobbleNowPlaying(song Song) {
+	params := struct {
+		Format       string `url:"f"`
+		User         string `url:"u"`
+		Password     string `url:"p"`
+		ClientID     string `url:"c"`
+		ID           string `url:"id"`
+		IsSubmission bool   `url:"submission"`
+	}{"json", client.auth.User, client.auth.Password, clientID, song.ID, false}
+
+	client.sling().New().
+		Post(client.url("rest/scrobble")).
+		BodyForm(params).
+		ReceiveSuccess(nil)
+}
+
+func (client Sonic) ScrobbleSubmit(song Song) {
+	params := struct {
+		Format       string `url:"f"`
+		User         string `url:"u"`
+		Password     string `url:"p"`
+		ClientID     string `url:"c"`
+		ID           string `url:"id"`
+		IsSubmission bool   `url:"submission"`
+	}{"json", client.auth.User, client.auth.Password, clientID, song.ID, true}
+
+	client.sling().New().
+		Post(client.url("rest/scrobble")).
+		BodyForm(params).
+		ReceiveSuccess(nil)
+}
