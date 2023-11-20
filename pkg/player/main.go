@@ -74,12 +74,11 @@ func Start(config Config) error {
 	if config.Shuffle {
 		playlist = playlist.Shuffle()
 	}
-	q := queue.Queue{
-		Playlist: playlist,
-		Depth:    3,
-		Shuffle:  config.Shuffle,
-		Client:   &client,
-	}
+	q := queue.New()
+	q.Playlist = playlist
+	q.Depth = 3
+	q.Shuffle = config.Shuffle
+	q.Client = &client
 	defer q.CleanUp()
 
 	started := make(chan bool)
@@ -144,12 +143,12 @@ func Start(config Config) error {
 			case char == 'p':
 				fallthrough
 			case char == '<':
-				// Previous
+				q.Previous()
+				music.Next()
 
 			case char == 'n':
 				fallthrough
 			case char == '>':
-				// Next
 				music.Next()
 
 			case key == keyboard.KeySpace:
@@ -166,27 +165,27 @@ func Start(config Config) error {
 		var (
 			lastPercent float64
 
-			next = q.WhatsNext()
+			song = q.WhatsNext()
 		)
 
-		bar.Describe(fmt.Sprintf("|> %s : %s", next.Meta.Artist, next.Meta.Title))
-		client.ScrobbleNowPlaying(next.Meta)
-		for msg := range music.Play(next.LocalFile) {
+		bar.Describe(fmt.Sprintf("|> %s : %s", song.Meta.Artist, song.Meta.Title))
+		client.ScrobbleNowPlaying(song.Meta)
+		for msg := range music.Play(song.LocalFile) {
 
 			lastPercent = msg.PercentComplete
 			bar.Set(int(msg.PercentComplete))
 		}
 
 		if lastPercent >= 75 {
-			client.ScrobbleSubmit(next.Meta)
+			client.ScrobbleSubmit(song.Meta)
 		}
 
 		bar.Describe("")
 		bar.Reset()
 
 		fmt.Printf("\033[2K")
-		fmt.Printf("\n=> %s - %s\n", next.Meta.Artist, next.Meta.Title)
-		next.Remove()
+		fmt.Printf("\n=> %s - %s\n", song.Meta.Artist, song.Meta.Title)
+		song.Remove()
 	}
 
 	return nil

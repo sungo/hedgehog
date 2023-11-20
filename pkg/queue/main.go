@@ -18,19 +18,29 @@ type Entry struct {
 }
 
 type (
-	UpNext []*Entry
-	Queue  struct {
+	entryList []*Entry
+	Queue     struct {
 		Playlist sonic.Playlist
 		Shuffle  bool
-		Idx      int
 		Depth    int
-		Playing  *Entry
-		UpNext   UpNext
 		Client   *sonic.Sonic
+
+		Playing  *Entry
+		upNext   entryList
+		previous entryList
 
 		songs sonic.Songs
 	}
 )
+
+func New() *Queue {
+	queue := Queue{
+		upNext:   make(entryList, 0),
+		previous: make(entryList, 0),
+	}
+
+	return &queue
+}
 
 func (queue *Queue) Fetch(entry *Entry) error {
 	entry.Downloading = true
@@ -70,18 +80,52 @@ func (entry *Entry) Remove() {
 	entry.LocalFile = ""
 }
 
-func (up UpNext) Clear() {
-	for idx := range up {
-		up[idx].Remove()
+func (list entryList) Clear() {
+	for idx := range list {
+		list[idx].Remove()
 	}
-	up = make(UpNext, 0)
+	list = make(entryList, 0)
 }
 
 func (queue *Queue) CleanUp() {
-	queue.UpNext.Clear()
+	queue.upNext.Clear()
+	queue.previous.Clear()
 	if queue.Playing != nil {
 		queue.Playing.Remove()
 		queue.Playing = nil
+	}
+}
+
+func (queue *Queue) Previous() {
+	if len(queue.Playlist.Songs) == 0 {
+		return
+	}
+	if len(queue.songs) == 0 {
+		return
+	}
+	if len(queue.previous) == 0 {
+		return
+	}
+
+	prev := queue.previous[len(queue.previous)-1]
+	if prev.LocalFile == "" {
+		if err := queue.Fetch(prev); err != nil {
+			panic(err)
+		}
+
+		for prev.Downloading == true {
+			time.Sleep(250 * time.Millisecond)
+		}
+	}
+
+	if queue.Playing == nil {
+		queue.upNext = append(entryList{prev}, queue.upNext...)
+	} else {
+		for queue.Playing.Downloading == true {
+			time.Sleep(250 * time.Millisecond)
+		}
+
+		queue.upNext = append(entryList{prev, queue.Playing}, queue.upNext...)
 	}
 }
 
@@ -99,33 +143,44 @@ func (queue *Queue) WhatsNext() *Entry {
 		}
 	}
 
-	if len(queue.UpNext) > 0 {
-		next := queue.UpNext[0]
-		queue.Playing = next
-		queue.UpNext = queue.UpNext[1:]
+	if len(queue.upNext) > 0 {
+		if queue.Playing != nil {
+			queue.previous = append(queue.previous, queue.Playing)
+		}
+
+		queue.Playing = queue.upNext[0]
+		queue.upNext = queue.upNext[1:]
 	}
 
-	for len(queue.UpNext) < queue.Depth {
+	for len(queue.upNext) < queue.Depth {
 		if len(queue.songs) == 0 {
 			break
 		}
-		next := Entry{Meta: queue.songs[0]}
-		if queue.Playing == nil {
-			queue.Playing = &next
+		nextQueued := &Entry{Meta: queue.songs[0]}
 
-			if err := queue.Fetch(&next); err != nil {
+		if queue.Playing == nil {
+			queue.Playing = nextQueued
+
+			if err := queue.Fetch(nextQueued); err != nil {
 				panic(err)
 			}
 		} else {
-			queue.UpNext = append(queue.UpNext, &next)
+			queue.upNext = append(queue.upNext, nextQueued)
 			go func() {
-				if err := queue.Fetch(&next); err != nil {
+				if err := queue.Fetch(nextQueued); err != nil {
 					panic(err)
 				}
 			}()
 		}
 		queue.songs = queue.songs[1:]
 	}
+
+	if queue.Playing.Downloading == false && queue.Playing.LocalFile == "" {
+		if err := queue.Fetch(queue.Playing); err != nil {
+			panic(err)
+		}
+	}
+
 	for queue.Playing.Downloading == true {
 		time.Sleep(250 * time.Millisecond)
 	}
