@@ -47,6 +47,7 @@ func Start(config Config) error {
 		},
 		config.URL,
 	)
+	fmt.Println("Fetching playlists...")
 	playlists, err := client.GetPlaylists()
 	if err != nil {
 		return err
@@ -66,6 +67,7 @@ func Start(config Config) error {
 	if playlistID == "" {
 		return errors.New("unable to find playlist")
 	}
+	fmt.Printf("Found playlist '%s' as %s'\n", config.PlaylistName, playlistID)
 
 	playlist, err := client.GetPlaylist(playlistID)
 	if err != nil {
@@ -77,8 +79,10 @@ func Start(config Config) error {
 	}
 
 	if config.Shuffle {
+		fmt.Println("Shuffling...")
 		playlist = playlist.Shuffle()
 	}
+
 	q := queue.New()
 	q.Playlist = playlist
 	q.Depth = 3
@@ -99,6 +103,7 @@ func Start(config Config) error {
 		os.RemoveAll(tempDir)
 	}
 
+	fmt.Println("Launching backend...")
 	go func() {
 		select {
 		case err := <-music.LaunchAndBlock(ctx, started):
