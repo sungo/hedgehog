@@ -14,7 +14,6 @@ type (
 		User         string `kong:"required,name='user',env='SONIC_USER',help='subsonic user name'"`
 		Password     string `kong:"required,name='password',env='SONIC_PASSWORD',help='subsonic password (sent in the url unencrypted)'"`
 		URL          string `kong:"required,name='url',env='SONIC_URL',help='url to the server (like https://music.wat)'"`
-		BasePath     string `kong:"optional,name='base-path',env='SONIC_BASE_PATH',help='base file directory (prepended to the music file path)'"`
 		PlaylistName string `kong:"required,name='playlist',env='SONIC_PLAYLIST'"`
 		Shuffle      bool   `kong:"optional,name='shuffle'"`
 	}
@@ -31,7 +30,6 @@ func (cmd Cmd) Run() error {
 		User:         cmd.User,
 		Password:     cmd.Password,
 		URL:          cmd.URL,
-		BasePath:     cmd.BasePath,
 		PlaylistName: cmd.PlaylistName,
 		Shuffle:      cmd.Shuffle,
 	})

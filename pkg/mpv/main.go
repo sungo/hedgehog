@@ -5,6 +5,7 @@ package mpv
 
 import (
 	"context"
+	"fmt"
 	"os/exec"
 	"time"
 
@@ -12,14 +13,15 @@ import (
 )
 
 type Instance struct {
-	running bool
+	running    bool
+	socketPath string
 
 	mpv *mpv.Client
 	cmd *exec.Cmd
 }
 
-func New() Instance {
-	return Instance{}
+func New(socketPath string) Instance {
+	return Instance{socketPath: socketPath}
 }
 
 func (inst *Instance) PauseToggle() {
@@ -106,8 +108,8 @@ func (inst *Instance) runOne(errChan chan error, started chan bool) {
 	inst.cmd = exec.Command(
 		"mpv",
 		"--idle",
-		"--input-ipc-server=/tmp/wat.sock",
-	) // FIXME: socket name should be at least in the system temp dir, if not randomized
+		fmt.Sprintf("--input-ipc-server=%s", inst.socketPath),
+	)
 
 	err := inst.cmd.Start()
 	if err != nil {
@@ -117,7 +119,7 @@ func (inst *Instance) runOne(errChan chan error, started chan bool) {
 	}
 	time.Sleep(1 * time.Second)
 
-	ipcc := mpv.NewIPCClient("/tmp/wat.sock")
+	ipcc := mpv.NewIPCClient(inst.socketPath)
 	inst.mpv = mpv.NewClient(ipcc)
 
 	started <- true

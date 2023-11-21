@@ -23,7 +23,6 @@ type Config struct {
 	User     string
 	Password string
 	URL      string
-	BasePath string
 
 	PlaylistName string
 	Shuffle      bool
@@ -34,6 +33,12 @@ func Start(config Config) error {
 		return err
 	}
 	defer keyboard.Close()
+
+	tempDir, err := os.MkdirTemp("", "hedgehog-*")
+	if err != nil {
+		return err
+	}
+	defer os.RemoveAll(tempDir)
 
 	client := sonic.New(
 		sonic.Auth{
@@ -79,10 +84,11 @@ func Start(config Config) error {
 	q.Depth = 3
 	q.Shuffle = config.Shuffle
 	q.Client = &client
+	q.TempDir = tempDir
 	defer q.CleanUp()
 
 	started := make(chan bool)
-	music := mpv.New()
+	music := mpv.New(fmt.Sprintf("%s/mpv.sock", tempDir))
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
@@ -90,6 +96,7 @@ func Start(config Config) error {
 		cancel()
 		q.CleanUp()
 		music.Shutdown()
+		os.RemoveAll(tempDir)
 	}
 
 	go func() {

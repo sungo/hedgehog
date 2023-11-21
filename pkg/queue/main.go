@@ -24,6 +24,7 @@ type (
 		Shuffle  bool
 		Depth    int
 		Client   *sonic.Sonic
+		TempDir  string
 
 		Playing  *Entry
 		upNext   entryList
@@ -47,7 +48,7 @@ func (queue *Queue) Fetch(entry *Entry) error {
 	defer func() { entry.Downloading = false }()
 
 	song := entry.Meta
-	tmpFile, err := os.CreateTemp("", fmt.Sprintf("hedgehog-*.%s", song.Suffix))
+	tmpFile, err := os.CreateTemp(queue.TempDir, fmt.Sprintf("hedgehog-*.%s", song.Suffix))
 	if err != nil {
 		return err
 	}
