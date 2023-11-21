@@ -169,11 +169,13 @@ func Start(config Config) error {
 		}
 	}()
 
-	bar := progressbar.NewOptions(100,
-		progressbar.OptionFullWidth(),
-	)
-
 	for {
+
+		bar := progressbar.NewOptions(100,
+			progressbar.OptionFullWidth(),
+			progressbar.OptionClearOnFinish(),
+		)
+
 		var (
 			lastPercent float64
 
@@ -192,11 +194,9 @@ func Start(config Config) error {
 			client.ScrobbleSubmit(song.Meta)
 		}
 
-		bar.Describe("")
-		bar.Reset()
+		bar.Finish()
 
-		fmt.Printf("\033[2K")
-		fmt.Printf("\n=> %s - %s\n", song.Meta.Artist, song.Meta.Title)
+		fmt.Printf("=> %s - %s\n", song.Meta.Artist, song.Meta.Title)
 		song.Remove()
 	}
 
