@@ -182,6 +182,11 @@ func Start(config Config) error {
 			song = q.WhatsNext()
 		)
 
+		if song == nil {
+			bye()
+			return nil
+		}
+
 		bar.Describe(fmt.Sprintf("|> %s : %s", song.Meta.Artist, song.Meta.Title))
 		client.ScrobbleNowPlaying(song.Meta)
 		for msg := range music.Play(song.LocalFile) {
