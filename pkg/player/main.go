@@ -30,6 +30,8 @@ type Config struct {
 	ReloadOnRepeat bool
 }
 
+const Controls string = "[ q: quit | m: mute | p/<: back | n/>: next | *: star/unstar | r: update playist | space: pause/unpause ]"
+
 func Start(config Config) error {
 	if err := keyboard.Open(); err != nil {
 		return err
@@ -139,6 +141,7 @@ func Start(config Config) error {
 		os.Exit(1)
 	}()
 
+	fmt.Println(Controls)
 	go func() {
 		for {
 			char, key, err := keyboard.GetKey()
