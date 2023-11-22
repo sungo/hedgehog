@@ -11,12 +11,13 @@ import (
 
 type (
 	Cmd struct {
-		User         string `kong:"required,name='user',env='SONIC_USER',help='subsonic user name'"`
-		Password     string `kong:"required,name='password',env='SONIC_PASSWORD',help='subsonic password (sent in the url unencrypted)'"`
-		URL          string `kong:"required,name='url',env='SONIC_URL',help='url to the server (like https://music.wat)'"`
-		PlaylistName string `kong:"required,name='playlist',env='SONIC_PLAYLIST'"`
-		Shuffle      bool   `kong:"optional,name='shuffle'"`
-		Repeat       bool   `kong:"optional,name='repeat'"`
+		User           string `kong:"required,name='user',env='SONIC_USER',help='subsonic user name'"`
+		Password       string `kong:"required,name='password',env='SONIC_PASSWORD',help='subsonic password (sent in the url unencrypted)'"`
+		URL            string `kong:"required,name='url',env='SONIC_URL',help='url to the server (like https://music.wat)'"`
+		PlaylistName   string `kong:"required,name='playlist',env='SONIC_PLAYLIST'"`
+		Shuffle        bool   `kong:"optional,name='shuffle'"`
+		Repeat         bool   `kong:"optional,name='repeat'"`
+		ReloadOnRepeat bool   `kong:"optional,name'reload-on-repeat',help='when we run out of stuff to play, automatically refresh the playlist'"`
 	}
 )
 
@@ -28,11 +29,12 @@ func main() {
 
 func (cmd Cmd) Run() error {
 	return player.Start(player.Config{
-		User:         cmd.User,
-		Password:     cmd.Password,
-		URL:          cmd.URL,
-		PlaylistName: cmd.PlaylistName,
-		Shuffle:      cmd.Shuffle,
-		Repeat:       cmd.Repeat,
+		User:           cmd.User,
+		Password:       cmd.Password,
+		URL:            cmd.URL,
+		PlaylistName:   cmd.PlaylistName,
+		Shuffle:        cmd.Shuffle,
+		Repeat:         cmd.Repeat,
+		ReloadOnRepeat: cmd.ReloadOnRepeat,
 	})
 }

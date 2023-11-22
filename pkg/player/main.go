@@ -24,9 +24,10 @@ type Config struct {
 	Password string
 	URL      string
 
-	PlaylistName string
-	Shuffle      bool
-	Repeat       bool
+	PlaylistName   string
+	Shuffle        bool
+	Repeat         bool
+	ReloadOnRepeat bool
 }
 
 func Start(config Config) error {
@@ -89,6 +90,7 @@ func Start(config Config) error {
 	q.Depth = 3
 	q.Shuffle = config.Shuffle
 	q.Repeat = config.Repeat
+	q.ReloadOnRepeat = config.ReloadOnRepeat
 	q.Client = &client
 	q.TempDir = tempDir
 	defer q.CleanUp()
@@ -163,6 +165,10 @@ func Start(config Config) error {
 			case char == 'n':
 				fallthrough
 			case char == '>':
+				music.Next()
+
+			case char == 'r':
+				q.UpdatePlaylist()
 				music.Next()
 
 			case key == keyboard.KeySpace:

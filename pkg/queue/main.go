@@ -4,6 +4,7 @@ package queue
 // Distributed under the terms of the 0BSD license https://opensource.org/licenses/0BSD
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"time"
@@ -20,12 +21,14 @@ type Entry struct {
 type (
 	entryList []*Entry
 	Queue     struct {
-		Playlist sonic.Playlist
-		Shuffle  bool
-		Repeat   bool
-		Depth    int
-		Client   *sonic.Sonic
-		TempDir  string
+		Playlist       sonic.Playlist
+		Shuffle        bool
+		Repeat         bool
+		ReloadOnRepeat bool
+
+		Depth   int
+		Client  *sonic.Sonic
+		TempDir string
 
 		Playing  *Entry
 		upNext   entryList
@@ -42,6 +45,24 @@ func New() *Queue {
 	}
 
 	return &queue
+}
+
+func (queue *Queue) UpdatePlaylist() {
+	playlist, err := queue.Client.GetPlaylist(queue.Playlist.ID)
+	if err != nil {
+		panic(err)
+	}
+
+	if len(playlist.Songs) == 0 {
+		panic(errors.New("empty playlist"))
+	}
+
+	if queue.Shuffle {
+		queue.Playlist = playlist.Shuffle()
+	} else {
+		queue.Playlist = playlist
+	}
+	queue.CleanUp()
 }
 
 func (queue *Queue) Fetch(entry *Entry) error {
@@ -137,9 +158,15 @@ func (queue *Queue) WhatsNext() *Entry {
 	}
 
 	if len(queue.songs) == 0 {
-		if len(queue.previous) > 0 && !queue.Repeat {
-			return nil
+		if len(queue.previous) > 0 {
+			if !queue.Repeat {
+				return nil
+			}
+			if queue.ReloadOnRepeat {
+				queue.UpdatePlaylist()
+			}
 		}
+
 		if queue.Shuffle {
 			shuffled := queue.Playlist.Shuffle()
 			queue.songs = shuffled.Songs
