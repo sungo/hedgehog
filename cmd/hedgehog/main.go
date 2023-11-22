@@ -16,6 +16,7 @@ type (
 		URL          string `kong:"required,name='url',env='SONIC_URL',help='url to the server (like https://music.wat)'"`
 		PlaylistName string `kong:"required,name='playlist',env='SONIC_PLAYLIST'"`
 		Shuffle      bool   `kong:"optional,name='shuffle'"`
+		Repeat       bool   `kong:"optional,name='repeat'"`
 	}
 )
 
@@ -32,5 +33,6 @@ func (cmd Cmd) Run() error {
 		URL:          cmd.URL,
 		PlaylistName: cmd.PlaylistName,
 		Shuffle:      cmd.Shuffle,
+		Repeat:       cmd.Repeat,
 	})
 }

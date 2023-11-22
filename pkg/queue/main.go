@@ -22,6 +22,7 @@ type (
 	Queue     struct {
 		Playlist sonic.Playlist
 		Shuffle  bool
+		Repeat   bool
 		Depth    int
 		Client   *sonic.Sonic
 		TempDir  string
@@ -136,6 +137,9 @@ func (queue *Queue) WhatsNext() *Entry {
 	}
 
 	if len(queue.songs) == 0 {
+		if len(queue.previous) > 0 && !queue.Repeat {
+			return nil
+		}
 		if queue.Shuffle {
 			shuffled := queue.Playlist.Shuffle()
 			queue.songs = shuffled.Songs

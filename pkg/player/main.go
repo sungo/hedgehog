@@ -26,6 +26,7 @@ type Config struct {
 
 	PlaylistName string
 	Shuffle      bool
+	Repeat       bool
 }
 
 func Start(config Config) error {
@@ -87,6 +88,7 @@ func Start(config Config) error {
 	q.Playlist = playlist
 	q.Depth = 3
 	q.Shuffle = config.Shuffle
+	q.Repeat = config.Repeat
 	q.Client = &client
 	q.TempDir = tempDir
 	defer q.CleanUp()
