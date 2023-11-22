@@ -191,6 +191,7 @@ func Start(config Config) error {
 
 		var (
 			lastPercent float64
+			isStarred   bool
 
 			song = q.WhatsNext()
 		)
@@ -201,12 +202,23 @@ func Start(config Config) error {
 		}
 
 		if song.Starred {
+			isStarred = true
 			bar.Describe(fmt.Sprintf("|> %s : %s [*]", song.Meta.Artist, song.Meta.Title))
 		} else {
 			bar.Describe(fmt.Sprintf("|> %s : %s", song.Meta.Artist, song.Meta.Title))
 		}
 		client.ScrobbleNowPlaying(song.Meta)
 		for msg := range music.Play(song.LocalFile) {
+			nowIsStarred := q.IsStarred(song)
+			if isStarred != nowIsStarred {
+				if nowIsStarred {
+					isStarred = true
+					bar.Describe(fmt.Sprintf("|> %s : %s [*]", song.Meta.Artist, song.Meta.Title))
+				} else {
+					bar.Describe(fmt.Sprintf("|> %s : %s", song.Meta.Artist, song.Meta.Title))
+				}
+				isStarred = nowIsStarred
+			}
 
 			lastPercent = msg.PercentComplete
 			bar.Set(int(msg.PercentComplete))

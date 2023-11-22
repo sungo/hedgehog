@@ -255,3 +255,13 @@ func (queue *Queue) StarToggle() {
 
 	queue.UpdateStarred()
 }
+
+func (queue *Queue) IsStarred(entry *Entry) bool {
+	// If you're asking for this, you doubt the entry. So let's fix it
+	if queue.starred[entry.Meta.ID] {
+		entry.Starred = true
+	} else {
+		entry.Starred = false
+	}
+	return entry.Starred
+}
