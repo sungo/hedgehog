@@ -48,12 +48,12 @@ type (
 	}
 	Songs []Song
 
-	StarredResponseWrapper struct {
-		Status   string          `json:"status"`
-		Response StarredResponse `json:"subsonic-response"`
+	GetStarredResponseWrapper struct {
+		Status   string             `json:"status"`
+		Response GetStarredResponse `json:"subsonic-response"`
 	}
 
-	StarredResponse struct {
+	GetStarredResponse struct {
 		Status        string           `json:"status"`
 		Version       string           `json:"version"`
 		Type          string           `json:"type"`
@@ -158,6 +158,34 @@ func (client Sonic) GetPlaylist(id string) (Playlist, error) {
 	}
 
 	return resp.Response.Playlist, nil
+}
+
+func (client Sonic) GetStarred() (map[string]bool, error) {
+	var (
+		resp GetStarredResponseWrapper
+		data = make(map[string]bool)
+	)
+
+	params := struct {
+		Format   string `url:"f"`
+		User     string `url:"u"`
+		Password string `url:"p"`
+		ClientID string `url:"c"`
+	}{"json", client.auth.User, client.auth.Password, clientID}
+
+	_, err := client.sling().New().
+		Post(client.url("rest/getStarred")).
+		BodyForm(params).
+		ReceiveSuccess(&resp)
+	if err != nil {
+		return data, err
+	}
+	for idx := range resp.Response.Starred["song"] {
+		song := resp.Response.Starred["song"][idx]
+		data[song.ID] = true
+	}
+
+	return data, nil
 }
 
 func (playlist Playlist) Shuffle() Playlist {

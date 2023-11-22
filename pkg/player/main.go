@@ -95,6 +95,8 @@ func Start(config Config) error {
 	q.TempDir = tempDir
 	defer q.CleanUp()
 
+	q.UpdateStarred()
+
 	started := make(chan bool)
 	music := mpv.New(fmt.Sprintf("%s/mpv.sock", tempDir))
 	ctx, cancel := context.WithCancel(context.Background())
@@ -195,7 +197,11 @@ func Start(config Config) error {
 			return nil
 		}
 
-		bar.Describe(fmt.Sprintf("|> %s : %s", song.Meta.Artist, song.Meta.Title))
+		if song.Starred {
+			bar.Describe(fmt.Sprintf("|> %s : %s [*]", song.Meta.Artist, song.Meta.Title))
+		} else {
+			bar.Describe(fmt.Sprintf("|> %s : %s", song.Meta.Artist, song.Meta.Title))
+		}
 		client.ScrobbleNowPlaying(song.Meta)
 		for msg := range music.Play(song.LocalFile) {
 

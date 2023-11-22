@@ -16,6 +16,7 @@ type Entry struct {
 	Meta        sonic.Song
 	LocalFile   string
 	Downloading bool
+	Starred     bool
 }
 
 type (
@@ -33,6 +34,7 @@ type (
 		Playing  *Entry
 		upNext   entryList
 		previous entryList
+		starred  map[string]bool
 
 		songs sonic.Songs
 	}
@@ -63,6 +65,15 @@ func (queue *Queue) UpdatePlaylist() {
 		queue.Playlist = playlist
 	}
 	queue.CleanUp()
+}
+
+func (queue *Queue) UpdateStarred() {
+	starred, err := queue.Client.GetStarred()
+	if err != nil {
+		return
+	}
+
+	queue.starred = starred
 }
 
 func (queue *Queue) Fetch(entry *Entry) error {
@@ -175,6 +186,8 @@ func (queue *Queue) WhatsNext() *Entry {
 		}
 	}
 
+	queue.UpdateStarred()
+
 	if len(queue.previous) > len(queue.Playlist.Songs) {
 		// Gotta limit the buffer somehow
 		queue.previous = queue.previous[1:]
@@ -194,6 +207,9 @@ func (queue *Queue) WhatsNext() *Entry {
 			break
 		}
 		nextQueued := &Entry{Meta: queue.songs[0]}
+		if queue.starred[nextQueued.Meta.ID] {
+			nextQueued.Starred = true
+		}
 
 		if queue.Playing == nil {
 			queue.Playing = nextQueued
