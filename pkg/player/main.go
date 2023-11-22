@@ -30,7 +30,7 @@ type Config struct {
 	ReloadOnRepeat bool
 }
 
-const Controls string = "[ q: quit | m: mute | p/<: back | n/>: next | *: star/unstar | r: update playist | space: pause/unpause ]"
+const Controls string = "[ q: quit | m: mute | p/<: back | n/>: next | *: star/unstar | r: update playlist | space: pause/unpause ]"
 
 func Start(config Config) error {
 	if err := keyboard.Open(); err != nil {
@@ -71,7 +71,7 @@ func Start(config Config) error {
 	if playlistID == "" {
 		return errors.New("unable to find playlist")
 	}
-	fmt.Printf("Found playlist '%s' as %s'\n", config.PlaylistName, playlistID)
+	fmt.Printf("Found playlist '%s' as '%s'\n", config.PlaylistName, playlistID)
 
 	playlist, err := client.GetPlaylist(playlistID)
 	if err != nil {
