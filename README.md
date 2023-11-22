@@ -17,6 +17,8 @@ make & build/hedgehog --url=https://music.wat --user=sungo --password=wat --play
 - p / < : Previous
 - n / > : Next
 - Space : pause toggle
+- `*` : star toggle
+- r : update playlist from server
 
 ## gif
 
