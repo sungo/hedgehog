@@ -148,6 +148,11 @@ func (queue *Queue) WhatsNext() *Entry {
 		}
 	}
 
+	if len(queue.previous) > len(queue.Playlist.Songs) {
+		// Gotta limit the buffer somehow
+		queue.previous = queue.previous[1:]
+	}
+
 	if len(queue.upNext) > 0 {
 		if queue.Playing != nil {
 			queue.previous = append(queue.previous, queue.Playing)
