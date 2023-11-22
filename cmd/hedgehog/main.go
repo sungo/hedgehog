@@ -14,10 +14,10 @@ type (
 		User           string `kong:"required,name='user',env='SONIC_USER',help='subsonic user name'"`
 		Password       string `kong:"required,name='password',env='SONIC_PASSWORD',help='subsonic password (sent in the url unencrypted)'"`
 		URL            string `kong:"required,name='url',env='SONIC_URL',help='url to the server (like https://music.wat)'"`
-		PlaylistName   string `kong:"required,name='playlist',env='SONIC_PLAYLIST'"`
-		Shuffle        bool   `kong:"optional,name='shuffle'"`
-		Repeat         bool   `kong:"optional,name='repeat'"`
-		ReloadOnRepeat bool   `kong:"optional,name'reload-on-repeat',help='when we run out of stuff to play, automatically refresh the playlist'"`
+		PlaylistName   string `kong:"required,name='playlist',env='SONIC_PLAYLIST',help='which playlist to play'"`
+		Shuffle        bool   `kong:"optional,negatable,name='shuffle',env='SONIC_SHUFFLE',help='shuffle the track order'"`
+		Repeat         bool   `kong:"optional,negatable,default=true,name='repeat',env='SONIC_REPEAT',help='when we run out of stuff to play, start over (with --shuffle, the list is reshuffled)'"`
+		ReloadOnRepeat bool   `kong:"optional,negatable,default=true,name'reload-on-repeat',env='SONIC_RELOAD_REPEAT',help='when we run out of stuff to play, automatically refresh the playlist'"`
 	}
 )
 
