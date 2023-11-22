@@ -255,3 +255,33 @@ func (client Sonic) ScrobbleSubmit(song Song) {
 		BodyForm(params).
 		ReceiveSuccess(nil)
 }
+
+func (client Sonic) Star(song Song) {
+	params := struct {
+		Format   string `url:"f"`
+		User     string `url:"u"`
+		Password string `url:"p"`
+		ClientID string `url:"c"`
+		ID       string `url:"id"`
+	}{"json", client.auth.User, client.auth.Password, clientID, song.ID}
+
+	client.sling().New().
+		Post(client.url("rest/star")).
+		BodyForm(params).
+		ReceiveSuccess(nil)
+}
+
+func (client Sonic) UnStar(song Song) {
+	params := struct {
+		Format   string `url:"f"`
+		User     string `url:"u"`
+		Password string `url:"p"`
+		ClientID string `url:"c"`
+		ID       string `url:"id"`
+	}{"json", client.auth.User, client.auth.Password, clientID, song.ID}
+
+	client.sling().New().
+		Post(client.url("rest/unstar")).
+		BodyForm(params).
+		ReceiveSuccess(nil)
+}

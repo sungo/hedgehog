@@ -169,6 +169,9 @@ func Start(config Config) error {
 			case char == '>':
 				music.Next()
 
+			case char == '*':
+				q.StarToggle()
+
 			case char == 'r':
 				q.UpdatePlaylist()
 				music.Next()

@@ -239,3 +239,19 @@ func (queue *Queue) WhatsNext() *Entry {
 	}
 	return queue.Playing
 }
+
+func (queue *Queue) StarToggle() {
+	song := queue.Playing
+	if song == nil {
+		return
+	}
+
+	queue.UpdateStarred()
+	if queue.starred[song.Meta.ID] {
+		queue.Client.UnStar(song.Meta)
+	} else {
+		queue.Client.Star(song.Meta)
+	}
+
+	queue.UpdateStarred()
+}
