@@ -22,7 +22,7 @@ make & build/hedgehog --url=https://music.wat --user=sungo --password=wat --play
 
 ## gif
 
-![hedgehog at work](out.gif)
+![hedgehog at work](example.gif)
 
 Recorded with [vhs](https://github.com/charmbracelet/vhs)
 
@@ -35,5 +35,5 @@ respecting the license, and have your way with it.
 
 # Licensing
 
-Licensed under 0BSD. See LICENSE.md for details
+Licensed under 0BSD. See [LICENSE.md](LICENSE.md) for details
 

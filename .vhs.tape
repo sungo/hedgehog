@@ -1,8 +1,12 @@
 Set Shell zsh
-Type 'build/hedgehog --playlist="starred" --shuffle'
-Sleep 500ms
+Set FontFamily "MonoLisaSungo Nerd Font"
+Set FontSize 13
+Set Width 800
+Set Height 300
+Output example.gif
+Type 'hedgehog --playlist="starred" --shuffle'
 Enter
-Sleep 7s
+Sleep 8s
 Type ">"
 Sleep 7s
 Type ">"
