@@ -19,6 +19,13 @@ type Entry struct {
 	Starred     bool
 }
 
+func (entry Entry) String() string {
+	if entry.Starred {
+		return fmt.Sprintf("|> %s : %s [*]", entry.Meta.Artist, entry.Meta.Title)
+	}
+	return fmt.Sprintf("|> %s : %s", entry.Meta.Artist, entry.Meta.Title)
+}
+
 type (
 	entryList []*Entry
 	Queue     struct {
