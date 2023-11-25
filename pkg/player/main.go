@@ -71,12 +71,13 @@ func Start(config Config) error {
 	if playlistID == "" {
 		return errors.New("unable to find playlist")
 	}
-	fmt.Printf("Found playlist '%s' as '%s'\n", config.PlaylistName, playlistID)
+	fmt.Printf("Fetching playlist '%s' as '%s'\n", config.PlaylistName, playlistID)
 
 	playlist, err := client.GetPlaylist(playlistID)
 	if err != nil {
 		return err
 	}
+	fmt.Println("Processing playlist...")
 
 	if len(playlist.Songs) == 0 {
 		return errors.New("empty playlist")
@@ -97,8 +98,10 @@ func Start(config Config) error {
 	q.TempDir = tempDir
 	defer q.CleanUp()
 
+	fmt.Println("Updating metadata...")
 	q.UpdateStarred()
 
+	fmt.Println("Launching backend...")
 	started := make(chan bool)
 	music := mpv.New(fmt.Sprintf("%s/mpv.sock", tempDir))
 	ctx, cancel := context.WithCancel(context.Background())
@@ -111,7 +114,6 @@ func Start(config Config) error {
 		os.RemoveAll(tempDir)
 	}
 
-	fmt.Println("Launching backend...")
 	go func() {
 		select {
 		case err := <-music.LaunchAndBlock(ctx, started):
@@ -127,7 +129,6 @@ func Start(config Config) error {
 	<-started
 	defer music.Shutdown()
 
-	// TIME TO PLAY SONGS YAY
 	sigc := make(chan os.Signal, 1)
 	signal.Notify(sigc,
 		syscall.SIGHUP,
@@ -141,7 +142,6 @@ func Start(config Config) error {
 		os.Exit(1)
 	}()
 
-	fmt.Println(Controls)
 	go func() {
 		for {
 			char, key, err := keyboard.GetKey()
@@ -184,6 +184,10 @@ func Start(config Config) error {
 			}
 		}
 	}()
+
+	fmt.Println("Buffering...")
+	fmt.Println()
+	fmt.Println(Controls)
 
 	for {
 
