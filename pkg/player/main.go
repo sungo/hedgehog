@@ -16,6 +16,7 @@ import (
 	"git.sr.ht/~sungo/hedgehog/pkg/sonic"
 
 	"github.com/eiannone/keyboard"
+	"github.com/gen2brain/beeep"
 	progressbar "github.com/schollz/progressbar/v3"
 )
 
@@ -28,6 +29,7 @@ type Config struct {
 	Shuffle        bool
 	Repeat         bool
 	ReloadOnRepeat bool
+	Notifications  bool
 }
 
 const Controls string = "[ q: quit | m: mute | p/<: back | n/>: next | *: star/unstar | r: update playlist | space: pause/unpause ]"
@@ -205,6 +207,10 @@ func Start(config Config) error {
 		if song == nil {
 			bye()
 			return nil
+		}
+
+		if config.Notifications {
+			beeep.Notify("Song Change", song.String(), "")
 		}
 
 		isStarred := song.Starred

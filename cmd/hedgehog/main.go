@@ -18,6 +18,7 @@ type (
 		Shuffle        bool   `kong:"optional,negatable,name='shuffle',env='SONIC_SHUFFLE',help='shuffle the track order'"`
 		Repeat         bool   `kong:"optional,negatable,default=true,name='repeat',env='SONIC_REPEAT',help='when we run out of stuff to play, start over (with --shuffle, the list is reshuffled)'"`
 		ReloadOnRepeat bool   `kong:"optional,negatable,default=true,name'reload-on-repeat',env='SONIC_RELOAD_REPEAT',help='when we run out of stuff to play, automatically refresh the playlist'"`
+		Notifications  bool   `kong:"optional,negatable,default=true,name='notifications',env='SONIC_NOTIFICATIONS',help='activate notifications on song change'"`
 	}
 )
 
@@ -36,5 +37,6 @@ func (cmd Cmd) Run() error {
 		Shuffle:        cmd.Shuffle,
 		Repeat:         cmd.Repeat,
 		ReloadOnRepeat: cmd.ReloadOnRepeat,
+		Notifications:  cmd.Notifications,
 	})
 }
